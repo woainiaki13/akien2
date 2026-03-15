@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>请输入 DeepSeek API Key</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .status-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        .status-value {
+            font-size: 16px;
+            color: #212529;
+            font-weight: 500;
+        }
+        .status-source {
+            font-size: 12px;
+            color: #28a745;
+            margin-top: 4px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-size: 14px;
+            color: #495057;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn {
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #e9ecef;
+        }
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+        .btn-danger {
+            background: #fff;
+            color: #dc3545;
+            border: 2px solid #dc3545;
+        }
+        .btn-danger:hover {
+            background: #dc3545;
+            color: white;
+        }
+        .note {
+            margin-top: 24px;
+            padding: 16px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+        }
+        .note-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash {
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .flash-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash-info {
+            background: #cce5ff;
+            color: #004085;
+            border: 1px solid #b8daff;
+        }
+        .flash-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 请输入 DeepSeek API Key</h1>
+        <p class="subtitle">助教检查用：如不输入将使用程序预设 Key</p>
+
+        <!-- Flash 消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 当前状态 -->
+        {% if is_initialized %}
+        <div class="status-box">
+            <div class="status-label">当前 Key 状态</div>
+            <div class="status-value">{{ masked_key }}</div>
+            <div class="status-source">来源：{{ key_source }}</div>
+        </div>
+        {% endif %}
+
+        <!-- 输入表单 -->
+        <form method="POST" action="{{ url_for('ai.key_page') }}">
+            <!-- ✅ CSRF Token（必须，否则会报 The CSRF token is missing） -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <input type="hidden" name="next" value="{{ next_url }}">
+
+            <div class="form-group">
+                <label for="api_key">API Key（可选）</label>
+                <input
+                    type="password"
+                    id="api_key"
+                    name="api_key"
+                    placeholder="sk-..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" name="action" value="save" class="btn btn-primary">
+                    💾 保存并继续
+                </button>
+                <button type="submit" name="action" value="skip" class="btn btn-secondary">
+                   ⏭️ 跳过（使用默认 Key）
+                </button>
+                {% if is_initialized %}
+                <button type="submit" name="action" value="clear" class="btn btn-danger">
+                    🗑️ 清除并重新输入
+                </button>
+                {% endif %}
+            </div>
+        </form>
+
+        <div class="note">
+            <div class="note-title">📝 说明</div>
+            <ul style="margin-left: 16px; margin-top: 8px;">
+                <li>此页面仅用于助教检查验证</li>
+                <li>如不输入将使用程序预设的默认 Key</li>
+                <li>Key 不会在页面上完整显示</li>
+                <li>Key 仅存储在您的浏览器 Session 中</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}选择功能 - 餐厅订餐系统{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <!-- 用户信息卡片 -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center py-4">
+                <!-- 用户头像 -->
+                <img src="{{ url_for('static', filename=current_user.avatar_path) }}" 
+                     alt="{{ current_user.username }}的头像" 
+                     class="avatar-img mb-3">
+                
+                <!-- 欢迎信息 -->
+                <h3 class="card-title">欢迎回来，{{ current_user.username }}！</h3>
+                <p class="text-muted mb-0">请选择您要使用的功能</p>
+            </div>
+        </div>
+        
+        <!-- 功能选择卡片 -->
+        <div class="row g-4">
+            <!-- 管理餐厅 -->
+            <div class="col-md-6">
+                <div class="card choice-card h-100 border-primary">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 mb-3">🏪</div>
+                        <h4 class="card-title text-primary">管理餐厅</h4>
+                        <p class="card-text text-muted">
+                            管理您的餐厅信息、菜单设置、订单处理等功能
+                        </p>
+                        <a href="{{ url_for('main.manage_placeholder') }}" 
+                           class="btn btn-primary btn-lg stretched-link">
+                            进入管理
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 订餐 -->
+            <div class="col-md-6">
+                <div class="card choice-card h-100 border-success">
+                    <div class="card-body text-center p-4">
+                        <div class="display-1 mb-3">🍕</div>
+                        <h4 class="card-title text-success">订餐</h4>
+                        <p class="card-text text-muted">
+                            浏览附近餐厅、查看菜单、在线下单订餐
+                        </p>
+                        <a href="{{ url_for('main.order_placeholder') }}" 
+                           class="btn btn-success btn-lg stretched-link">
+                            开始订餐
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

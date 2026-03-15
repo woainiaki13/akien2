@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}消费者详情 - {{ consumer.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📋 消费者详情</h2>
+        <div>
+            <a href="{{ url_for('manager.consumers') }}" class="btn btn-outline-secondary me-2">
+                ← 返回消费者列表
+            </a>
+            <a href="{{ url_for('manager.home') }}" class="btn btn-outline-secondary">
+                返回餐厅管理
+            </a>
+        </div>
+    </div>
+    
+    <!-- 消费者基本信息 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="{{ url_for('static', filename=consumer.avatar_path) }}" 
+                         alt="{{ consumer.username }}" 
+                         class="rounded-circle"
+                         style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+                <div class="col">
+                    <h4 class="mb-1">{{ consumer.username }}</h4>
+                    <p class="text-muted mb-1">用户ID: {{ consumer.id }}</p>
+                    <p class="text-muted mb-0">邮箱: {{ consumer.email }}</p>
+                </div>
+                <div class="col-auto text-end">
+                    <div class="bg-light rounded p-3">
+                        <div class="row g-4">
+                            <div class="col-6">
+                                <div class="text-muted small">总份数</div>
+                                <div class="fs-4 fw-bold text-primary">{{ total_qty }}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-muted small">总消费金额</div>
+                                <div class="fs-4 fw-bold text-danger">¥{{ "%.2f"|format(total_amount) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 统计说明 -->
+    <div class="alert alert-info">
+        <strong>统计说明：</strong>仅统计已支付的订单数据
+    </div>
+    
+    <!-- 菜品消费明细 -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <strong>菜品消费明细</strong>
+        </div>
+        <div class="card-body p-0">
+            {% if dish_summary %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 80px;">图片</th>
+                            <th>菜品名称</th>
+                            <th class="text-center">总份数</th>
+                            <th class="text-end">总消费金额</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dish, qty, amount in dish_summary %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename=dish.image_path) }}" 
+                                     alt="{{ dish.name }}" 
+                                     class="rounded"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
+                            </td>
+                            <td>{{ dish.name }}</td>
+                            <td class="text-center">{{ qty }}</td>
+                            <td class="text-end text-danger">¥{{ "%.2f"|format(amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th colspan="2" class="text-end">合计：</th>
+                            <th class="text-center">{{ total_qty }}</th>
+                            <th class="text-end text-danger">¥{{ "%.2f"|format(total_amount) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="display-1 mb-3">📋</div>
+                <h5 class="text-muted">该消费者暂无消费记录</h5>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
