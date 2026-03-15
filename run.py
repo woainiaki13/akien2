@@ -1,17 +1,13 @@
-
 import os
 import dotenv
 
-# 加载环境变量
 dotenv.load_dotenv()
 
-import app as app_module
+from app import create_app
 
-# 创建应用实例
-app = app_module.create_app()
+app = create_app()
 
 if __name__ == '__main__':
-    # 开发模式下运行
     app.run(
         host='0.0.0.0',
         port=int(os.environ.get('PORT', 5000)),
