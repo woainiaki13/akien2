@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}菜品报表 - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📈 菜品报表</h2>
+        <a href="{{ url_for('manager.home') }}" class="btn btn-outline-secondary">
+            ← 返回餐厅管理
+        </a>
+    </div>
+    
+    <div class="alert alert-info">
+        <strong>统计说明：</strong>仅统计已支付的订单数据
+    </div>
+    
+    <!-- 模式切换 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <span class="fw-bold">报表模式：</span>
+                </div>
+                <div class="col-auto">
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('manager.reports', mode='qty') }}" 
+                           class="btn {{ 'btn-primary' if mode == 'qty' else 'btn-outline-primary' }}">
+                            按份数
+                        </a>
+                        <a href="{{ url_for('manager.reports', mode='amount') }}" 
+                           class="btn {{ 'btn-success' if mode == 'amount' else 'btn-outline-success' }}">
+                            按销售额
+                        </a>
+                    </div>
+                </div>
+                <div class="col text-end">
+                    <!-- 显示总计 -->
+                    <span class="badge bg-{{ 'primary' if mode == 'qty' else 'success' }} fs-5 p-2">
+                        {{ total_label }}: 
+                        {% if mode == 'qty' %}
+                            {{ total_value }} 份
+                        {% else %}
+                            ¥{{ "%.2f"|format(total_value) }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 饼图展示 -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <strong>
+                {% if mode == 'qty' %}
+                    菜品销量分布（按份数）
+                {% else %}
+                    菜品销售额分布（按金额）
+                {% endif %}
+            </strong>
+        </div>
+        <div class="card-body text-center">
+            {% if has_data %}
+            <img src="{{ url_for('manager.pie_chart', mode=mode) }}" 
+                 alt="饼图报表" 
+                 class="img-fluid"
+                 style="max-width: 800px;">
+            {% else %}
+            <div class="py-5">
+                <div class="display-1 mb-3">📊</div>
+                <h4 class="text-muted">暂无数据</h4>
+                <p class="text-muted">还没有已支付的订单记录</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 数据说明 -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-light">
+            <strong>数据说明</strong>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li><strong>按份数：</strong>统计每道菜被点的总份数，用于了解哪些菜品最受欢迎</li>
+                <li><strong>按销售额：</strong>统计每道菜的总销售金额，用于了解哪些菜品贡献最大</li>
+                <li><strong>数据范围：</strong>仅包含已支付(PAID)状态的订单</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

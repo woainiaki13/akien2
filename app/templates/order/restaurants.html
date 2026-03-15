@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}餐厅列表 - 订餐{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🍽️ 餐厅列表</h2>
+        <a href="{{ url_for('main.choice') }}" class="btn btn-outline-secondary">
+            ← 返回选择页面
+        </a>
+    </div>
+    
+    <p class="text-muted mb-4">按销售额排序，为您推荐最受欢迎的餐厅</p>
+    
+    {% if restaurants_with_sales %}
+    <div class="row g-4">
+        {% for restaurant, sales in restaurants_with_sales %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <a href="{{ url_for('order.restaurant', restaurant_id=restaurant.id) }}" 
+                   class="text-decoration-none">
+                    <div class="card-body text-center">
+                        <img src="{{ url_for('static', filename=restaurant.logo_path) }}" 
+                             alt="{{ restaurant.name }}" 
+                             class="rounded-circle mb-3"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        <h5 class="card-title text-dark">{{ restaurant.name }}</h5>
+                        <p class="card-text">
+                            <span class="badge bg-success">
+                                累计销售额: ¥{{ "%.2f"|format(sales) }}
+                            </span>
+                        </p>
+                    </div>
+                </a>
+                <div class="card-footer bg-transparent text-center">
+                    <a href="{{ url_for('order.restaurant', restaurant_id=restaurant.id) }}" 
+                       class="btn btn-primary btn-sm">
+                        进入点餐
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="display-1 mb-3">🏪</div>
+        <h4 class="text-muted">暂无餐厅</h4>
+        <p class="text-muted">还没有餐厅入驻，请稍后再来</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

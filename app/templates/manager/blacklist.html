@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}黑名单管理 - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>🚫 黑名单管理</h2>
+        <a href="{{ url_for('manager.home') }}" class="btn btn-outline-secondary">
+            ← 返回餐厅管理
+        </a>
+    </div>
+    
+    <!-- 添加黑名单表单 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">添加用户到黑名单</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('manager.blacklist_add') }}" class="row g-3 align-items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-md-8">
+                    <label class="form-label">选择用户</label>
+                    <select name="user_id" class="form-select" required>
+                        <option value="">-- 请选择用户 --</option>
+                        {% for user in available_users %}
+                        <option value="{{ user.id }}">
+                            {{ user.username }} ({{ user.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">只显示未被拉黑且有订单记录的用户</div>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-danger w-100">
+                        添加到黑名单
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 黑名单列表 -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">当前黑名单 ({{ blacklist_entries|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if blacklist_entries %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>用户</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>拉黑时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in blacklist_entries %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename=entry.user.avatar_path) }}" 
+                                     alt="{{ entry.user.username }}" 
+                                     class="rounded-circle"
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                            </td>
+                            <td>{{ entry.user.username }}</td>
+                            <td>{{ entry.user.email }}</td>
+                            <td>{{ entry.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <form method="POST" 
+                                      action="{{ url_for('manager.blacklist_remove', entry_id=entry.id) }}"
+                                      style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"
+                                            onclick="return confirm('确定要将该用户移出黑名单吗？');">
+                                        移出黑名单
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <div class="display-4 mb-3">✅</div>
+                <p class="text-muted">黑名单为空</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

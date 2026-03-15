@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}菜品统计 - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📊 菜品统计</h2>
+        <a href="{{ url_for('manager.home') }}" class="btn btn-outline-secondary">
+            ← 返回餐厅管理
+        </a>
+    </div>
+    
+    <div class="alert alert-info">
+        <strong>统计说明：</strong>仅统计已支付的订单数据
+    </div>
+    
+    {% if dish_stats %}
+    <div class="row g-4">
+        {% for item in dish_stats %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-auto">
+                            <img src="{{ url_for('static', filename=item.dish.image_path) }}" 
+                                 alt="{{ item.dish.name }}" 
+                                 class="rounded"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        </div>
+                        <div class="col">
+                            <h5 class="card-title mb-1">{{ item.dish.name }}</h5>
+                            <p class="text-danger mb-2">¥{{ "%.2f"|format(item.dish.price) }}</p>
+                            <div class="row">
+                                <div class="col-6">
+                                    <span class="badge bg-primary fs-6">
+                                        总份数: {{ item.total_qty }}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="badge bg-secondary fs-6">
+                                        消费者: {{ item.consumer_count }} 人
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 消费者列表 -->
+                    <hr>
+                    <h6>点过此菜的消费者：</h6>
+                    {% if item.consumers %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for consumer in item.consumers %}
+                        <a href="{{ url_for('manager.consumer_history', user_id=consumer.id) }}" 
+                           class="text-decoration-none" 
+                           title="用户ID: {{ consumer.id }} - {{ consumer.username }}">
+                            <img src="{{ url_for('static', filename=consumer.avatar_path) }}" 
+                                 alt="{{ consumer.username }}" 
+                                 class="rounded-circle border"
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">暂无消费者</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="display-1 mb-3">📋</div>
+        <h4 class="text-muted">暂无菜品</h4>
+        <p class="text-muted">请先添加菜品</p>
+        <a href="{{ url_for('manager.home') }}" class="btn btn-primary">
+            返回添加菜品
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ dish.name }} - {{ restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <img src="{{ url_for('static', filename=dish.image_path) }}" 
+                     alt="{{ dish.name }}" 
+                     class="card-img-top"
+                     style="height: 300px; object-fit: cover;">
+                
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h3 class="card-title mb-1">{{ dish.name }}</h3>
+                            <p class="text-muted mb-0">
+                                <small>来自 {{ restaurant.name }}</small>
+                            </p>
+                        </div>
+                        <span class="badge bg-danger fs-5">¥{{ "%.2f"|format(dish.price) }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5>菜品描述</h5>
+                    <p class="card-text">{{ dish.description }}</p>
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <form method="POST" action="{{ url_for('order.cart_add', dish_id=dish.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                🛒 加入我的餐桌
+                            </button>
+                        </form>
+                        
+                        <a href="{{ url_for('order.ask', dish_id=dish.id) }}" 
+                           class="btn btn-outline-info">
+                            💬 询问菜品信息
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-transparent">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('order.restaurant', restaurant_id=restaurant.id) }}" 
+                           class="btn btn-outline-secondary">
+                            ← 返回菜单
+                        </a>
+                        <a href="{{ url_for('order.cart') }}" class="btn btn-warning">
+                            🛒 查看餐桌
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

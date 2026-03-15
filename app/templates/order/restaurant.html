@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}{{ restaurant.name }} - 点餐{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 餐厅信息头部 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="{{ url_for('static', filename=restaurant.logo_path) }}" 
+                         alt="{{ restaurant.name }}" 
+                         class="rounded"
+                         style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+                <div class="col">
+                    <h3 class="mb-1">{{ restaurant.name }}</h3>
+                    <p class="text-muted mb-0">选择您喜欢的菜品</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('order.cart') }}" class="btn btn-warning me-2">
+                        🛒 我的餐桌
+                    </a>
+                    <a href="{{ url_for('order.home') }}" class="btn btn-outline-secondary">
+                        ← 返回餐厅列表
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 提示：购物车中有其他餐厅的菜品 -->
+    {% if cart_restaurant_id and cart_restaurant_id != restaurant.id %}
+    <div class="alert alert-warning d-flex justify-content-between align-items-center">
+        <span>
+            <strong>提示：</strong>你的餐桌中已有其他餐厅的菜品，请先结算或清空餐桌。
+        </span>
+        <form method="POST" action="{{ url_for('order.cart_clear') }}" style="display: inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">清空餐桌</button>
+        </form>
+    </div>
+    {% endif %}
+    
+    <!-- 分类和菜品列表 -->
+    <div class="row">
+        <!-- 左侧分类导航 -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group sticky-top" style="top: 20px;">
+                {% for cat_data in categories_data %}
+                <a href="#category-{{ cat_data.name_internal }}" 
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    {% if cat_data.name_internal == 'Drink' %}🥤{% endif %}
+                    {% if cat_data.name_internal == 'Dish' %}🍽️{% endif %}
+                    {% if cat_data.name_internal == 'Staple' %}🍚{% endif %}
+                    {% if cat_data.name_internal == 'Other' %}🍱{% endif %}
+                    {{ cat_data.name_display }}
+                    <span class="badge bg-secondary">{{ cat_data.dishes|length }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- 右侧菜品列表 -->
+        <div class="col-md-9">
+            {% for cat_data in categories_data %}
+            <div id="category-{{ cat_data.name_internal }}" class="mb-4">
+                <h4 class="border-bottom pb-2 mb-3">
+                    {% if cat_data.name_internal == 'Drink' %}🥤{% endif %}
+                    {% if cat_data.name_internal == 'Dish' %}🍽️{% endif %}
+                    {% if cat_data.name_internal == 'Staple' %}🍚{% endif %}
+                    {% if cat_data.name_internal == 'Other' %}🍱{% endif %}
+                    {{ cat_data.name_display }}
+                </h4>
+                
+                {% if cat_data.dishes %}
+                <div class="row g-3">
+                    {% for dish in cat_data.dishes %}
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="row g-0">
+                                <div class="col-4">
+                                    <a href="{{ url_for('order.dish_detail', dish_id=dish.id) }}">
+                                        <img src="{{ url_for('static', filename=dish.image_path) }}" 
+                                             alt="{{ dish.name }}" 
+                                             class="img-fluid rounded-start h-100"
+                                             style="object-fit: cover; min-height: 120px;">
+                                    </a>
+                                </div>
+                                <div class="col-8">
+                                    <div class="card-body py-2">
+                                        <h6 class="card-title mb-1">
+                                            <a href="{{ url_for('order.dish_detail', dish_id=dish.id) }}" 
+                                               class="text-decoration-none text-dark">
+                                                {{ dish.name }}
+                                            </a>
+                                        </h6>
+                                        <p class="card-text small text-muted text-truncate mb-1" 
+                                           style="max-width: 150px;">
+                                            {{ dish.description }}
+                                        </p>
+                                        <p class="card-text text-danger fw-bold mb-2">
+                                            ¥{{ "%.2f"|format(dish.price) }}
+                                        </p>
+                                        <div class="btn-group btn-group-sm">
+                                            {% if not cart_restaurant_id or cart_restaurant_id == restaurant.id %}
+                                            <form method="POST" 
+                                                  action="{{ url_for('order.cart_add', dish_id=dish.id) }}"
+                                                  style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    加入餐桌
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                            <a href="{{ url_for('order.ask', dish_id=dish.id) }}" 
+                                               class="btn btn-outline-info btn-sm">
+                                                询问
+                                            </a>
+                                        </div>
+                                        {% if cart_items.get(dish.id|string) %}
+                                        <span class="badge bg-warning text-dark ms-2">
+                                            已选 {{ cart_items.get(dish.id|string) }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">该分类下暂无菜品</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

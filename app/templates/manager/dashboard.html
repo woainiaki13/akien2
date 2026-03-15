@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}餐厅状态一览 - 餐厅订餐系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 餐厅信息卡片 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <img src="{{ url_for('static', filename=restaurant.logo_path) }}" 
+                         alt="{{ restaurant.name }}的Logo" 
+                         class="rounded"
+                         style="width: 80px; height: 80px; object-fit: cover;">
+                </div>
+                <div class="col">
+                    <h3 class="mb-1">{{ restaurant.name }}</h3>
+                    <p class="text-muted mb-0">餐厅状态一览</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('main.choice') }}" class="btn btn-outline-secondary">
+                        {{ ui_text['common']['back'] }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 智能顾问卡片（Step-5新增） -->
+    <div class="card shadow-sm mb-4 border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">🤖 智能经营顾问</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-3">AI 驱动的经营分析助手，帮您分析销售数据、消费者行为，并提供经营建议。</p>
+            <a href="{{ url_for('manager.advisor') }}" class="btn btn-success btn-lg">
+                💬 开始咨询
+            </a>
+        </div>
+    </div>
+    
+    <!-- 功能导航卡片 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">📊 数据分析与管理</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{{ url_for('manager.dish_stats') }}" class="btn btn-outline-primary w-100">
+                        📊 菜品统计
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('manager.consumers') }}" class="btn btn-outline-success w-100">
+                        👥 消费者列表
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('manager.reports') }}" class="btn btn-outline-info w-100">
+                        📈 菜品报表
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('manager.blacklist') }}" class="btn btn-outline-danger w-100">
+                        🚫 黑名单管理
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 类别和菜品列表 -->
+    <h4 class="mb-4">{{ ui_text['category']['title'] }}</h4>
+    
+    <div class="row g-4">
+        {% for category_name in fixed_categories %}
+            {% set cat_data = category_dishes.get(category_name, {}) %}
+            {% set category = cat_data.get('category') %}
+            {% set dishes = cat_data.get('dishes', []) %}
+            {% set label = cat_data.get('label', category_name) %}
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ label }}</h5>
+                        {% if category %}
+                        <a href="{{ url_for('manager.add_dish', category_name=category_name) }}" 
+                           class="btn btn-sm btn-primary">
+                            + {{ ui_text['dish']['add_dish'] }}
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if dishes %}
+                            <div class="list-group list-group-flush">
+                                {% for dish in dishes %}
+                                <div class="list-group-item px-0">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto">
+                                            <img src="{{ url_for('static', filename=dish.image_path) }}" 
+                                                 alt="{{ dish.name }}" 
+                                                 class="rounded"
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                        </div>
+                                        <div class="col">
+                                            <h6 class="mb-1">{{ dish.name }}</h6>
+                                            <p class="mb-1 text-muted small">{{ dish.description[:50] }}{% if dish.description|length > 50 %}...{% endif %}</p>
+                                            <p class="mb-0 text-danger fw-bold">¥{{ "%.2f"|format(dish.price) }}</p>
+                                        </div>
+                                        <div class="col-auto">
+                                            <form method="POST" 
+                                                  action="{{ url_for('manager.delete_dish', dish_id=dish.id) }}"
+                                                  onsubmit="return confirm('{{ ui_text['dish']['delete_confirm'] }}');"
+                                                  style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    {{ ui_text['common']['delete'] }}
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center my-4">{{ ui_text['dish']['no_dishes'] }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

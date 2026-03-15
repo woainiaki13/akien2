@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}智能问答 - {{ dish.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">💬 智能问答</h4>
+                    <div>
+                        <a href="{{ url_for('order.ask', dish_id=dish.id, clear=1) }}" 
+                           class="btn btn-sm btn-outline-light"
+                           onclick="return confirm('确定要清空聊天记录吗？');">
+                            🗑️ 清空记录
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- 菜品信息 -->
+                    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                        <img src="{{ url_for('static', filename=dish.image_path) }}" 
+                             alt="{{ dish.name }}" 
+                             class="rounded me-3"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h5 class="mb-1">{{ dish.name }}</h5>
+                            <span class="badge bg-danger">¥{{ "%.2f"|format(dish.price) }}</span>
+                            <p class="text-muted small mb-0 mt-1">{{ restaurant.name }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if not api_configured %}
+                    <!-- API未配置提示 -->
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">⚠️ 智能问答功能未配置</h5>
+                        <p class="mb-2">当前未设置 DeepSeek API Key，因此无法使用智能问答。</p>
+                        <hr>
+                        <p class="mb-0 small">
+                            <strong>配置方法：</strong>设置环境变量 <code>DEEPSEEK_API_KEY</code>（必要），可选配置 <code>DEEPSEEK_BASE_URL</code> / <code>DEEPSEEK_MODEL</code> / <code>DEEPSEEK_TIMEOUT_SECONDS</code>。<br>
+                            请联系系统管理员进行配置。
+                        </p>
+                    </div>
+
+                    <!-- 表单禁用（避免误提交/不崩溃） -->
+                    <form class="mt-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-lg" placeholder="智能问答功能未配置" disabled>
+                            <button type="button" class="btn btn-info btn-lg" disabled>
+                                发送 ➤
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    
+                    <!-- 错误消息 -->
+                    {% if error_message %}
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        {{ error_message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- 聊天历史 -->
+                    <div class="chat-container mb-4" style="max-height: 400px; overflow-y: auto;" id="chatContainer">
+                        {% if chat_history %}
+                            {% for msg in chat_history %}
+                            <div class="mb-3">
+                                {% if msg.role == 'user' %}
+                                <div class="d-flex justify-content-end">
+                                    <div class="bg-primary text-white rounded-3 p-3" style="max-width: 80%;">
+                                        <small class="d-block text-light opacity-75 mb-1">👤 我</small>
+                                        {{ msg.content }}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="d-flex justify-content-start">
+                                    <div class="bg-light rounded-3 p-3" style="max-width: 80%;">
+                                        <small class="d-block text-muted mb-1">🤖 助手</small>
+                                        <div class="assistant-message">{{ msg.content | safe }}</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <div class="display-1 mb-2">🤖</div>
+                            <p>你好！我是点餐助手，有什么关于「{{ dish.name }}」的问题可以问我哦~</p>
+                            <p class="small">试试问：<br>
+                                "这道菜好吃吗？"<br>
+                                "有什么推荐搭配吗？"<br>
+                                "适合几个人吃？"
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 输入表单 -->
+                    <form method="POST" class="mt-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="input-group">
+                            <input type="text" 
+                                   name="message" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="输入您的问题..."
+                                   autocomplete="off"
+                                   required>
+                            <button type="submit" class="btn btn-info btn-lg">
+                                发送 ➤
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                    
+                    <hr class="my-4">
+                    
+                    <!-- 菜品基本信息 -->
+                    <h5 class="mb-3">菜品信息</h5>
+                    <div class="bg-light p-3 rounded mb-4">
+                        <p class="mb-2"><strong>名称：</strong>{{ dish.name }}</p>
+                        <p class="mb-2"><strong>价格：</strong>¥{{ "%.2f"|format(dish.price) }}</p>
+                        <p class="mb-0"><strong>描述：</strong>{{ dish.description }}</p>
+                    </div>
+                    
+                    <!-- 返回按钮 -->
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('order.dish_detail', dish_id=dish.id) }}" 
+                           class="btn btn-outline-primary">
+                            ← 返回菜品详情
+                        </a>
+                        <a href="{{ url_for('order.restaurant', restaurant_id=restaurant.id) }}" 
+                           class="btn btn-outline-secondary">
+                            返回餐厅菜单
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 自动滚动到聊天底部
+document.addEventListener('DOMContentLoaded', function() {
+    var chatContainer = document.getElementById('chatContainer');
+    if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+});
+</script>
+{% endblock %}

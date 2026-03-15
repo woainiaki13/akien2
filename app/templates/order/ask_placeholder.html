@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}智能问答 - {{ dish.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">💬 智能问答</h4>
+                </div>
+                
+                <div class="card-body">
+                    <!-- 菜品信息 -->
+                    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                        <img src="{{ url_for('static', filename=dish.image_path) }}" 
+                             alt="{{ dish.name }}" 
+                             class="rounded me-3"
+                             style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h5 class="mb-1">{{ dish.name }}</h5>
+                            <span class="badge bg-danger">¥{{ "%.2f"|format(dish.price) }}</span>
+                            <p class="text-muted small mb-0 mt-1">{{ restaurant.name }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 占位提示 -->
+                    <div class="text-center py-4">
+                        <div class="display-1 mb-3">🤖</div>
+                        <h4 class="text-info mb-3">智能问答功能</h4>
+                        <p class="text-muted mb-4">
+                            此功能将在 <strong>Step-5</strong> 接入 DeepSeek API，届时您可以：
+                        </p>
+                        <ul class="list-unstyled text-start mx-auto" style="max-width: 300px;">
+                            <li class="mb-2">✨ 询问菜品的详细信息</li>
+                            <li class="mb-2">✨ 了解食材和口味</li>
+                            <li class="mb-2">✨ 获取个性化推荐</li>
+                            <li class="mb-2">✨ 智能对话交互</li>
+                        </ul>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- 菜品基本信息展示 -->
+                    <h5 class="mb-3">菜品信息</h5>
+                    <div class="bg-light p-3 rounded mb-4">
+                        <p class="mb-2"><strong>名称：</strong>{{ dish.name }}</p>
+                        <p class="mb-2"><strong>价格：</strong>¥{{ "%.2f"|format(dish.price) }}</p>
+                        <p class="mb-0"><strong>描述：</strong>{{ dish.description }}</p>
+                    </div>
+                    
+                    <!-- 返回按钮 -->
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('order.dish_detail', dish_id=dish.id) }}" 
+                           class="btn btn-outline-primary">
+                            ← 返回菜品详情
+                        </a>
+                        <a href="{{ url_for('order.restaurant', restaurant_id=restaurant.id) }}" 
+                           class="btn btn-outline-secondary">
+                            返回餐厅菜单
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
