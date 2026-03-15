@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-应用入口文件
-用于启动Flask开发服务器
-"""
 
 import os
 import dotenv
